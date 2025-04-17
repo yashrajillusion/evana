@@ -1,3 +1,4 @@
+import { APIResponse } from "@/types";
 import { eventSchema, paginationSchema } from "@/validation/event";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
@@ -54,12 +55,12 @@ export async function GET(req: NextRequest) {
       remainingSpots: event.max_capacity - event._count.bookings,
     }));
 
-    return NextResponse.json(
+    return NextResponse.json<APIResponse<typeof formatted>>(
       { success: true, data: formatted },
       { status: 200 }
     );
   } catch (error) {
-    return NextResponse.json(
+    return NextResponse.json<APIResponse<null>>(
       { success: false, message: "Failed to fetch events" },
       { status: 500 }
     );
@@ -89,10 +90,13 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, data: event }, { status: 201 });
+    return NextResponse.json<APIResponse<typeof event>>(
+      { success: true, data: event },
+      { status: 201 }
+    );
   } catch (error) {
-    return NextResponse.json(
-      { error: "Internal server error" },
+    return NextResponse.json<APIResponse<null>>(
+      { success: false, error: "Internal server error" },
       { status: 500 }
     );
   }
