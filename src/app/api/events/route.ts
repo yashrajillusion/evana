@@ -1,4 +1,4 @@
-import { APIResponse } from "@/types";
+import { APIResponse, ErrorResponse, EventSummary, FullEvent } from "@/types";
 import { eventSchema, paginationSchema } from "@/validation/event";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const formatted = events.map((event) => ({
+    const formatted: EventSummary[] = events.map((event) => ({
       id: event.id,
       title: event.title,
       startTime: event.start_time,
@@ -55,12 +55,12 @@ export async function GET(req: NextRequest) {
       remainingSpots: event.max_capacity - event._count.bookings,
     }));
 
-    return NextResponse.json<APIResponse<typeof formatted>>(
+    return NextResponse.json<APIResponse<EventSummary[]>>(
       { success: true, data: formatted },
       { status: 200 }
     );
   } catch (error) {
-    return NextResponse.json<APIResponse<null>>(
+    return NextResponse.json<ErrorResponse>(
       { success: false, message: "Failed to fetch events" },
       { status: 500 }
     );
@@ -90,12 +90,12 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json<APIResponse<typeof event>>(
+    return NextResponse.json<APIResponse<FullEvent>>(
       { success: true, data: event },
       { status: 201 }
     );
   } catch (error) {
-    return NextResponse.json<APIResponse<null>>(
+    return NextResponse.json<ErrorResponse>(
       { success: false, error: "Internal server error" },
       { status: 500 }
     );

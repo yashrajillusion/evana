@@ -1,6 +1,6 @@
-import { APIResponse } from "@/types";
+import { APIResponse, ErrorResponse } from "@/types";
 import { userSchema } from "@/validation/user";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
@@ -9,7 +9,10 @@ export async function GET(req: NextRequest) {
   try {
     const users = await prisma.user.findMany();
 
-    return NextResponse.json({ success: true, data: users }, { status: 200 });
+    return NextResponse.json<APIResponse<User[]>>(
+      { success: true, data: users },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Failed to fetch users" },
@@ -37,7 +40,7 @@ export async function POST(req: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json<APIResponse<null>>(
+      return NextResponse.json<ErrorResponse>(
         { success: false, message: "Email is already registered" },
         { status: 400 }
       );
@@ -50,12 +53,12 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json<APIResponse<typeof user>>(
+    return NextResponse.json<APIResponse<User>>(
       { success: true, data: user },
       { status: 201 }
     );
   } catch (error) {
-    return NextResponse.json<APIResponse<null>>(
+    return NextResponse.json<ErrorResponse>(
       { success: false, error: "Internal server error" },
       { status: 500 }
     );

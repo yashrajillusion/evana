@@ -6,7 +6,7 @@ import { toast, Toaster } from "sonner";
 import api from "@/lib/axios";
 import { EventsList, Header, SearchBar } from "@/component/EventList";
 
-const USER_ID = "cm9lwjoz20006ouhfkb35uwc3";
+const USER_ID = "cm9mcsy9p001iourkysurzhrl";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -111,4 +111,3 @@ export default function EventsPage() {
     </div>
   );
 }
-

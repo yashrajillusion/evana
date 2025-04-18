@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { bookingSchema } from "@/validation/book";
-import { APIResponse, BookingInput } from "@/types";
+import { APIResponse, BookingInput, ErrorResponse } from "@/types";
 
 const prisma = new PrismaClient();
 
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      return NextResponse.json<APIResponse<null>>(
+      return NextResponse.json<ErrorResponse>(
         { success: false, error: "User does not exist" },
         { status: 404 }
       );
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (existingBooking) {
-      return NextResponse.json<APIResponse<null>>(
+      return NextResponse.json<ErrorResponse>(
         { success: false, error: "User already booked this event" },
         { status: 409 }
       );
@@ -50,14 +50,14 @@ export async function POST(req: NextRequest) {
     });
 
     if (!event) {
-      return NextResponse.json<APIResponse<null>>(
+      return NextResponse.json<ErrorResponse>(
         { success: false, error: "Event not found" },
         { status: 404 }
       );
     }
 
     if (event._count.bookings >= event.max_capacity) {
-      return NextResponse.json<APIResponse<null>>(
+      return NextResponse.json<ErrorResponse>(
         { success: false, error: "Event is fully booked" },
         { status: 400 }
       );
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    return NextResponse.json<APIResponse<null>>(
+    return NextResponse.json<ErrorResponse>(
       { success: false, error: "Internal server error" },
       { status: 500 }
     );
