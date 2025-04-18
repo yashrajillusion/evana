@@ -31,9 +31,6 @@ export async function GET(req: NextRequest) {
           contains: search,
         },
       },
-      orderBy: {
-        start_time: "asc",
-      },
       select: {
         id: true,
         title: true,

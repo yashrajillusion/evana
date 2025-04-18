@@ -7,7 +7,7 @@ import api from "@/lib/axios";
 import { EventsList, Header, SearchBar } from "@/component/EventList";
 import useOnScreen from "@/helper/useOnScreen";
 
-const USER_ID = "cm9mcsy9p001iourkysurzhrl";
+const USER_ID = process.env.NEXT_PUBLIC_USER_ID;
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
