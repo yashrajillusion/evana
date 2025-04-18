@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 import api from "@/lib/axios";
 import { EventsList, Header, SearchBar } from "@/component/EventList";
+import useOnScreen from "@/helper/useOnScreen";
 
 const USER_ID = "cm9mcsy9p001iourkysurzhrl";
 
@@ -13,6 +14,16 @@ export default function EventsPage() {
   const [bookedEvents, setBookedEvents] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const { measureRef, isIntersecting, observer } = useOnScreen();
+
+  useEffect(() => {
+    if (isIntersecting && !loading && hasMore) {
+      setPage((prev) => prev + 1);
+      observer?.disconnect();
+    }
+  }, [isIntersecting]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -24,7 +35,7 @@ export default function EventsPage() {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [search]);
+  }, [search, page]);
 
   const getBookedFromLocalStorage = (): string[] => {
     if (typeof window === "undefined") return [];
@@ -40,10 +51,11 @@ export default function EventsPage() {
     setLoading(true);
     try {
       const res = await api.get("/events", {
-        params: { search },
+        params: { search, page, limit: 5 },
         signal: controller.signal,
       });
-      setEvents(res.data.data);
+      setEvents((prev) => [...prev, ...res.data.data]);
+      setHasMore(res.data.data.length > 0);
     } catch (error: any) {
       if (error.code !== "ERR_CANCELED") toast.error("Event failed to fetch!");
     } finally {
@@ -99,13 +111,21 @@ export default function EventsPage() {
       <Toaster richColors position="top-right" />
       <div className="max-w-7xl mx-auto">
         <Header />
-        <SearchBar value={search} onChange={setSearch} />
+        <SearchBar
+          value={search}
+          onChange={(value) => {
+            setPage(1);
+            setEvents([]);
+            setSearch(value);
+          }}
+        />
         <EventsList
           events={events}
           loading={loading}
           bookedEvents={bookedEvents}
           onBook={handleBook}
           onCancel={handleCancelBooking}
+          measureRef={measureRef}
         />
       </div>
     </div>

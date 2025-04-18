@@ -1,3 +1,4 @@
+import useOnScreen from "@/helper/useOnScreen";
 import { Event } from "@/types";
 import { Search } from "lucide-react";
 
@@ -7,14 +8,16 @@ export const EventsList = ({
   bookedEvents,
   onBook,
   onCancel,
+  measureRef,
 }: {
   events: Event[];
   loading: boolean;
   bookedEvents: string[];
   onBook: (id: string) => void;
   onCancel: (id: string) => void;
+  measureRef: (node: HTMLElement | null) => void;
 }) => {
-  if (loading) {
+  if (loading && !events.length) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-12">
         {Array.from({ length: 4 }).map((_, i) => (
@@ -37,10 +40,14 @@ export const EventsList = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-12">
-      {events.map((event) => {
+      {events.map((event, index) => {
         const isBooked = bookedEvents.includes(event.id);
         return (
-          <div key={event.id} className="bg-black shadow p-4 rounded-lg border">
+          <div
+            key={event.id}
+            ref={index === events.length - 1 ? measureRef : null}
+            className="bg-black shadow p-4 rounded-lg border"
+          >
             <h2 className="text-xl font-semibold">{event.title}</h2>
             <p>Start Time: {new Date(event.startTime).toLocaleString()}</p>
             <p>Remaining Spots: {event.remainingSpots}</p>
