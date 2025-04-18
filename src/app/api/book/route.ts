@@ -72,8 +72,79 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error(error);
     return NextResponse.json<APIResponse<null>>(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { userId, eventId } = body;
+
+    if (!userId || !eventId) {
+      return NextResponse.json(
+        { success: false, error: "Missing userId or eventId" },
+        { status: 400 }
+      );
+    }
+
+    const existingBooking = await prisma.booking.findFirst({
+      where: {
+        userId,
+        eventId,
+      },
+    });
+
+    if (!existingBooking) {
+      return NextResponse.json(
+        { success: false, error: "Booking not found" },
+        { status: 404 }
+      );
+    }
+
+    await prisma.booking.delete({
+      where: {
+        id: existingBooking.id,
+      },
+    });
+
+    return NextResponse.json(
+      { success: true, message: "Booking cancelled successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: "Missing userId" },
+        { status: 400 }
+      );
+    }
+
+    const bookings = await prisma.booking.findMany({
+      where: { userId },
+    });
+
+    return NextResponse.json(
+      { success: true, data: bookings },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }
     );
