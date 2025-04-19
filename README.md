@@ -3,7 +3,7 @@ A simple fullstack event booking system built with Next.js and TypeScript. Users
 
 ## 🔗 Live Demo
 
-Check out the live app here: [Event Booking App](https://your-live-link.vercel.app)
+Check out the live app here: [Event Booking App](https://evana-green.vercel.app/events)
 
 
 ## Getting Started
